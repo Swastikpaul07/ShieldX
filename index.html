@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>ShieldX — Intelligent Identity &amp; Document Risk Screening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink-900:#0B1524;
+  --ink-800:#0F1D31;
+  --ink-700:#16233A;
+  --ink-600:#233350;
+  --bg:#F3F6FA;
+  --surface:#FFFFFF;
+  --border:#E1E7EF;
+  --border-soft:#EDF1F6;
+  --text:#101828;
+  --text-muted:#5C6B84;
+  --text-faint:#8894A8;
+  --brand:#0AA6A6;
+  --brand-dark:#078282;
+  --brand-darker:#056868;
+  --brand-soft:#E1F6F4;
+  --brand-soft-2:#CFF1EE;
+  --safe:#178A5A;
+  --safe-soft:#E4F8EF;
+  --warn:#B5720C;
+  --warn-soft:#FCF0D9;
+  --danger:#C23434;
+  --danger-soft:#FBE7E7;
+  --shadow-sm:0 1px 2px rgba(16,24,40,.06);
+  --shadow-md:0 4px 14px rgba(16,24,40,.08);
+  --shadow-lg:0 16px 40px rgba(11,21,36,.16);
+  --radius:12px;
+  --radius-sm:8px;
+  --sidebar-w:264px;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4,.font-display{font-family:'Space Grotesk','Inter',sans-serif;}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+a{color:inherit;}
+button{font-family:inherit;}
+::selection{background:var(--brand-soft-2);}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+img{max-width:100%;display:block;}
+
+/* ---------- utility ---------- */
+.hidden{display:none !important;}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.flex{display:flex;}
+.flex-col{display:flex;flex-direction:column;}
+.items-center{align-items:center;}
+.justify-between{justify-content:space-between;}
+.gap-8{gap:8px;} .gap-12{gap:12px;} .gap-16{gap:16px;} .gap-24{gap:24px;}
+.w-full{width:100%;}
+.text-muted{color:var(--text-muted);}
+.text-faint{color:var(--text-faint);}
+.text-sm{font-size:13px;} .text-xs{font-size:11.5px;}
+
+/* ---------- buttons & inputs ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 18px;border-radius:9px;border:1px solid transparent;
+  font-size:14px;font-weight:600;cursor:pointer;transition:.15s ease;
+  white-space:nowrap;line-height:1.2;
+}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--brand);color:#fff;box-shadow:var(--shadow-sm);}
+.btn-primary:hover{background:var(--brand-dark);}
+.btn-dark{background:var(--ink-900);color:#fff;}
+.btn-dark:hover{background:var(--ink-700);}
+.btn-outline{background:var(--surface);border-color:var(--border);color:var(--text);}
+.btn-outline:hover{border-color:var(--brand);color:var(--brand-dark);}
+.btn-ghost{background:transparent;color:var(--text-muted);}
+.btn-ghost:hover{background:var(--border-soft);color:var(--text);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{background:#a52a2a;}
+.btn-safe{background:var(--safe);color:#fff;}
+.btn-safe:hover{background:#0f6d46;}
+.btn-warn{background:var(--warn);color:#fff;}
+.btn-warn:hover{background:#8f5a09;}
+.btn-sm{padding:7px 12px;font-size:12.5px;border-radius:7px;}
+.btn-block{width:100%;}
+.btn[disabled]{opacity:.5;cursor:not-allowed;}
+.btn-icon{padding:9px;border-radius:8px;}
+
+label.field-label{display:block;font-size:12.5px;font-weight:600;color:var(--text-muted);margin-bottom:6px;letter-spacing:.01em;}
+.input,select.input,textarea.input{
+  width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);font-size:14px;color:var(--text);font-family:inherit;
+  transition:.15s;
+}
+.input:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);outline:none;}
+.field{margin-bottom:16px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width:640px){.field-row{grid-template-columns:1fr;}}
+
+/* ---------- cards / surfaces ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+.card-pad{padding:20px;}
+.section-title{font-size:15px;font-weight:700;margin:0 0 4px;}
+.section-sub{font-size:12.5px;color:var(--text-muted);margin:0 0 16px;}
+
+/* ---------- badges ---------- */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:100px;font-size:11.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;}
+.badge-safe{background:var(--safe-soft);color:var(--safe);}
+.badge-warn{background:var(--warn-soft);color:var(--warn);}
+.badge-danger{background:var(--danger-soft);color:var(--danger);}
+.badge-neutral{background:var(--border-soft);color:var(--text-muted);}
+.badge-brand{background:var(--brand-soft);color:var(--brand-dark);}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+
+/* ================= LOGIN ================= */
+.login-wrap{min-height:100vh;display:flex;}
+.login-aside{
+  flex:1.1;background:radial-gradient(circle at 20% 20%,#123047,var(--ink-900) 60%);
+  color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:space-between;
+  position:relative;overflow:hidden;
+}
+.login-aside::before{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:36px 36px;mask-image:radial-gradient(circle at 30% 30%,black,transparent 75%);
+}
+.login-aside > *{position:relative;z-index:1;}
+.brand-mark{display:flex;align-items:center;gap:10px;font-family:'Space Grotesk';font-weight:700;font-size:20px;}
+.brand-glyph{width:34px;height:34px;flex-shrink:0;}
+.login-headline{font-family:'Space Grotesk';font-weight:700;font-size:clamp(28px,3.6vw,42px);line-height:1.12;margin:40px 0 14px;max-width:520px;}
+.login-copy{color:#B7C4D9;font-size:15px;max-width:440px;line-height:1.6;}
+.login-stats{display:flex;gap:36px;margin-top:48px;flex-wrap:wrap;}
+.login-stat b{display:block;font-family:'Space Grotesk';font-size:26px;color:#5EEAD4;}
+.login-stat span{font-size:12px;color:#8FA0BC;}
+.login-form-side{flex:1;display:flex;align-items:center;justify-content:center;padding:32px;background:var(--bg);}
+.login-box{width:100%;max-width:400px;}
+.login-box h2{font-size:24px;margin:0 0 6px;}
+.login-box p.sub{color:var(--text-muted);font-size:13.5px;margin:0 0 28px;}
+.demo-creds{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:20px;}
+.demo-cred-btn{border:1px dashed var(--border);background:var(--surface);border-radius:8px;padding:9px 6px;font-size:11.5px;text-align:center;cursor:pointer;color:var(--text-muted);transition:.15s;}
+.demo-cred-btn:hover{border-color:var(--brand);color:var(--brand-dark);background:var(--brand-soft);}
+.login-error{background:var(--danger-soft);color:var(--danger);padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+@media (max-width:860px){.login-aside{display:none;}}
+
+/* ================= APP SHELL ================= */
+.app-shell{display:flex;min-height:100vh;}
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;background:var(--ink-900);color:#CBD5E5;
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:60;
+  transition:transform .25s ease;
+}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:20px 20px 16px;font-family:'Space Grotesk';font-weight:700;color:#fff;font-size:18px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sidebar-nav{flex:1;overflow-y:auto;padding:14px 12px;}
+.nav-group-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#5E7191;padding:14px 10px 6px;font-weight:700;}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font-size:13.6px;font-weight:500;
+  cursor:pointer;margin-bottom:2px;color:#B9C6DC;transition:.12s;
+}
+.nav-item svg{flex-shrink:0;opacity:.85;}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.nav-item.active{background:linear-gradient(90deg,rgba(10,166,166,.28),rgba(10,166,166,.06));color:#fff;box-shadow:inset 3px 0 0 var(--brand);}
+.sidebar-foot{padding:14px 20px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:11.5px;color:#5E7191;}
+.sidebar-scrim{display:none;position:fixed;inset:0;background:rgba(8,14,24,.55);z-index:55;}
+
+.main-col{flex:1;margin-left:var(--sidebar-w);min-width:0;display:flex;flex-direction:column;}
+.topbar{
+  height:64px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:40;
+}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;margin-right:4px;border-radius:8px;}
+.hamburger:hover{background:var(--border-soft);}
+.topbar-title{font-family:'Space Grotesk';font-weight:700;font-size:17px;}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.user-chip{display:flex;align-items:center;gap:10px;padding:6px 10px 6px 6px;border-radius:100px;background:var(--border-soft);cursor:pointer;position:relative;}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;flex-shrink:0;}
+.user-chip .uname{font-size:13px;font-weight:600;line-height:1.1;}
+.user-chip .urole{font-size:10.5px;color:var(--text-muted);}
+.user-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);width:200px;padding:6px;display:none;z-index:70;}
+.user-menu.open{display:block;}
+.user-menu button{width:100%;text-align:left;padding:9px 10px;border-radius:7px;border:none;background:none;font-size:13px;cursor:pointer;color:var(--text);}
+.user-menu button:hover{background:var(--border-soft);}
+.content{padding:26px 28px 60px;max-width:1400px;width:100%;margin:0 auto;}
+@media (max-width:1100px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-scrim.show{display:block;}
+  .main-col{margin-left:0;}
+  .hamburger{display:inline-flex;align-items:center;}
+  .content{padding:18px 16px 48px;}
+}
+
+/* ================= dashboard ================= */
+.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:22px;}
+@media (max-width:1200px){.stat-grid{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;position:relative;overflow:hidden;}
+.stat-card .stat-label{font-size:11.5px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.stat-card .stat-val{font-family:'Space Grotesk';font-size:28px;font-weight:700;margin-top:6px;}
+.stat-card .stat-delta{font-size:11.5px;margin-top:4px;font-weight:600;}
+.stat-card .stat-icon{position:absolute;right:14px;top:14px;opacity:.14;}
+.dash-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px;}
+@media (max-width:1000px){.dash-grid{grid-template-columns:1fr;}}
+.chart-box{position:relative;height:230px;}
+.chart-box-sm{position:relative;height:190px;}
+
+/* ================= tables ================= */
+table.data-table{width:100%;border-collapse:collapse;font-size:13.4px;}
+table.data-table th{
+  text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);
+  font-weight:700;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap;
+}
+table.data-table td{padding:12px;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+table.data-table tbody tr{cursor:pointer;transition:.1s;}
+table.data-table tbody tr:hover{background:var(--brand-soft);}
+.case-id{font-family:'JetBrains Mono';font-size:12px;color:var(--text-muted);}
+@media (max-width:760px){
+  table.data-table thead{display:none;}
+  table.data-table, table.data-table tbody, table.data-table tr, table.data-table td{display:block;width:100%;}
+  table.data-table tr{border:1px solid var(--border);border-radius:10px;margin-bottom:10px;padding:8px 4px;background:var(--surface);}
+  table.data-table td{border:none;padding:6px 12px;display:flex;justify-content:space-between;gap:10px;text-align:right;}
+  table.data-table td::before{content:attr(data-label);font-size:11px;font-weight:700;color:var(--text-muted);text-align:left;text-transform:uppercase;letter-spacing:.03em;}
+}
+
+/* ================= wizard / pipeline ================= */
+.stepper{display:flex;align-items:center;margin-bottom:26px;flex-wrap:wrap;gap:0;}
+.stepper .step{display:flex;align-items:center;gap:8px;color:var(--text-faint);font-size:12.5px;font-weight:700;}
+.stepper .step .num{width:26px;height:26px;border-radius:50%;background:var(--border-soft);color:var(--text-faint);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.stepper .step.active .num{background:var(--brand);color:#fff;}
+.stepper .step.done .num{background:var(--safe);color:#fff;}
+.stepper .step.active,.stepper .step.done{color:var(--text);}
+.stepper .line{flex:1;height:2px;background:var(--border);margin:0 10px;min-width:24px;}
+.stepper .line.done{background:var(--safe);}
+
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media (max-width:700px){.upload-grid{grid-template-columns:1fr;}}
+.upload-box{
+  border:1.5px dashed var(--border);border-radius:12px;padding:20px;text-align:center;background:var(--bg);
+  cursor:pointer;transition:.15s;position:relative;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+}
+.upload-box:hover{border-color:var(--brand);background:var(--brand-soft);}
+.upload-box.filled{border-style:solid;border-color:var(--safe);background:var(--safe-soft);}
+.upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.upload-box .up-title{font-size:13px;font-weight:700;}
+.upload-box .up-sub{font-size:11.5px;color:var(--text-muted);}
+.upload-thumb{width:100%;height:90px;object-fit:cover;border-radius:8px;margin-bottom:4px;}
+
+.pipeline{display:flex;flex-direction:column;gap:0;margin:20px 0;}
+.pipe-stage{display:flex;gap:14px;padding:14px 4px;position:relative;}
+.pipe-stage .rail{display:flex;flex-direction:column;align-items:center;width:34px;flex-shrink:0;}
+.pipe-stage .rail .circ{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--border-soft);color:var(--text-faint);flex-shrink:0;transition:.2s;}
+.pipe-stage .rail .bar{flex:1;width:2px;background:var(--border);margin:4px 0;min-height:18px;}
+.pipe-stage.done .rail .circ{background:var(--safe-soft);color:var(--safe);}
+.pipe-stage.active .rail .circ{background:var(--brand);color:#fff;box-shadow:0 0 0 5px var(--brand-soft);}
+.pipe-stage.done .rail .bar{background:var(--safe);}
+.pipe-stage .body{flex:1;padding-top:2px;}
+.pipe-stage .p-title{font-size:13.6px;font-weight:700;}
+.pipe-stage .p-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ================= gauge (signature element) ================= */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;}
+.gauge-score{font-family:'Space Grotesk';font-size:38px;font-weight:700;margin-top:-46px;}
+.gauge-verdict{margin-top:2px;}
+.gauge-label{font-size:11px;color:var(--text-muted);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;}
+
+/* ================= misc ================= */
+.kv-list{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;}
+@media (max-width:600px){.kv-list{grid-template-columns:1fr;}}
+.kv-item{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-bottom:1px dashed var(--border-soft);}
+.kv-item .k{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;font-weight:700;}
+.kv-item .v{font-size:13.6px;font-weight:600;}
+.factor-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-soft);}
+.factor-row:last-child{border-bottom:none;}
+.factor-name{width:190px;flex-shrink:0;font-size:13px;font-weight:600;}
+.factor-bar-track{flex:1;height:8px;border-radius:5px;background:var(--border-soft);overflow:hidden;}
+.factor-bar-fill{height:100%;border-radius:5px;}
+.factor-pts{width:56px;text-align:right;font-size:12.5px;font-weight:700;flex-shrink:0;}
+@media (max-width:640px){.factor-row{flex-wrap:wrap;}.factor-name{width:100%;}.factor-pts{margin-left:auto;}}
+
+.check-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border-soft);gap:10px;}
+.check-row:last-child{border-bottom:none;}
+.check-left{display:flex;align-items:center;gap:10px;font-size:13.4px;font-weight:600;}
+.check-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto;}
+.tab-btn{padding:11px 16px;font-size:13.4px;font-weight:600;color:var(--text-muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.tab-btn.active{color:var(--brand-dark);border-bottom-color:var(--brand);}
+
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center;}
+.filter-bar .input{width:auto;min-width:150px;}
+.search-input-wrap{position:relative;flex:1;min-width:200px;}
+.search-input-wrap .input{padding-left:34px;}
+.search-input-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.5;}
+
+.modal-scrim{position:fixed;inset:0;background:rgba(11,21,36,.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal-box{background:var(--surface);border-radius:14px;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg);}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);}
+.modal-body{padding:22px;}
+.modal-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+
+.timeline{position:relative;padding-left:26px;}
+.timeline::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--border);}
+.tl-item{position:relative;padding-bottom:20px;}
+.tl-item::before{content:"";position:absolute;left:-26px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--brand);border:3px solid var(--brand-soft);}
+.tl-item .tl-title{font-size:13.4px;font-weight:700;}
+.tl-item .tl-meta{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+.tl-item .tl-note{font-size:12.5px;margin-top:5px;background:var(--bg);border-radius:7px;padding:8px 10px;}
+
+.toast-host{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:10px;max-width:340px;}
+.toast{background:var(--ink-900);color:#fff;padding:12px 16px;border-radius:10px;font-size:13px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;animation:toastIn .25s ease;}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.toast.ok{border-left:3px solid var(--safe);}
+.toast.warn{border-left:3px solid var(--warn);}
+.toast.err{border-left:3px solid var(--danger);}
+
+.empty-state{text-align:center;padding:50px 20px;color:var(--text-muted);}
+.progress-track{height:8px;border-radius:5px;background:var(--border-soft);overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-dark));border-radius:5px;transition:width .4s ease;}
+
+.toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle .slider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:22px;transition:.2s;}
+.toggle .slider::before{content:"";position:absolute;height:16px;width:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.toggle input:checked + .slider{background:var(--brand);}
+.toggle input:checked + .slider::before{transform:translateX(18px);}
+
+.perm-table{width:100%;border-collapse:collapse;font-size:12.8px;}
+.perm-table th,.perm-table td{padding:10px;text-align:center;border-bottom:1px solid var(--border-soft);}
+.perm-table th{font-size:11px;text-transform:uppercase;color:var(--text-muted);}
+.perm-table td:first-child,.perm-table th:first-child{text-align:left;font-weight:600;}
+
+.slider-range{width:100%;}
+.report-preview{background:#fff;border:1px solid var(--border);border-radius:10px;padding:24px;font-size:12.8px;}
+.report-preview h3{margin-top:0;}
+.hr-line{height:1px;background:var(--border);margin:14px 0;border:none;}
+.print-only{display:none;}
+@media print{
+  body *{visibility:hidden;}
+  #reportPrintArea, #reportPrintArea *{visibility:visible;}
+  #reportPrintArea{position:absolute;top:0;left:0;width:100%;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast-host" id="toastHost"></div>
+<script>
+/* =========================================================================
+   ShieldX — Intelligent Identity & Document Risk Screening
+   Frontend prototype. Deterministic demo logic simulates the analysis
+   pipeline (OCR / tamper detection / identity matching / voice analysis /
+   source verification / risk fusion) that in production is served by a
+   Python + FastAPI backend (PaddleOCR/Tesseract, OpenCV, PostgreSQL).
+   ========================================================================= */
+
+/* ---------------------------- icon set (inline SVG) ---------------------------- */
+const ICONS = {
+  logo: `<svg class="brand-glyph" viewBox="0 0 40 40" fill="none"><path d="M20 3 34 9v11c0 9.4-6 16.7-14 17-8-.3-14-7.6-14-17V9l14-6Z" fill="#0AA6A6"/><path d="M20 3 34 9v11c0 9.4-6 16.7-14 17V3Z" fill="#5EEAD4"/><path d="m14 20 4 4 8-8" stroke="#0B1524" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  dashboard: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>`,
+  scan: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4a1 1 0 0 1 1-1h3M17 3h3a1 1 0 0 1 1 1v3M21 17v3a1 1 0 0 1-1 1h-3M7 21H4a1 1 0 0 1-1-1v-3"/><line x1="3" y1="12" x2="21" y2="12"/></svg>`,
+  cases: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h3l2 2h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>`,
+  audit: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 3H8l1-3Z"/><rect x="4" y="6" width="16" height="15" rx="2"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg>`,
+  settings: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 0 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 0 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z"/></svg>`,
+  bell: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>`,
+  menu: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
+  search: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+  check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  x: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  alert: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.86 1.8 18a1.6 1.6 0 0 0 1.4 2.4h17.6a1.6 1.6 0 0 0 1.4-2.4L13.7 3.86a1.6 1.6 0 0 0-2.8 0Z"/></svg>`,
+  doc: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>`,
+  mic: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>`,
+  face: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15c1 1.2 2.4 2 4 2s3-.8 4-2"/></svg>`,
+  chev: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+  download: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M4 19h16"/></svg>`,
+  shieldcheck: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>`,
+  plus: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  lock: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>`,
+};
+function icon(name){ return ICONS[name] || ''; }
+
+/* ---------------------------- deterministic RNG ---------------------------- */
+function strHash(str){
+  let h = 2166136261;
+  for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h,16777619); }
+  return h >>> 0;
+}
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function rngFor(seedStr){ return mulberry32(strHash(seedStr)); }
+function pick(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
+function rint(rng, min, max){ return Math.floor(rng()*(max-min+1))+min; }
+function fmtDate(d){ const dt = (d instanceof Date)?d:new Date(d); return dt.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}); }
+function fmtDateTime(d){ const dt=(d instanceof Date)?d:new Date(d); return dt.toLocaleString('en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function daysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return d; }
+function uid(prefix){ return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase(); }
+function initials(name){ return name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ---------------------------- verdict helpers ---------------------------- */
+function verdictFromScore(score){
+  if(score <= 30) return 'Genuine';
+  if(score <= 60) return 'Suspicious';
+  return 'High Risk';
+}
+function verdictColorVar(v){
+  return v==='Genuine' ? '--safe' : v==='Suspicious' ? '--warn' : '--danger';
+}
+function verdictBadgeClass(v){
+  return v==='Genuine' ? 'badge-safe' : v==='Suspicious' ? 'badge-warn' : 'badge-danger';
+}
+function statusBadgeClass(s){
+  if(s==='Approved') return 'badge-safe';
+  if(s==='Rejected') return 'badge-danger';
+  if(s==='Escalated') return 'badge-warn';
+  return 'badge-brand'; // Pending Review
+}
+
+/* ---------------------------- demo users (RBAC) ---------------------------- */
+const DEMO_USERS = [
+  { username:'admin',    password:'admin123',    name:'Priya Sharma',  role:'Administrator', email:'priya.sharma@shieldx.io' },
+  { username:'analyst',  password:'analyst123',  name:'Daniel Okafor', role:'Analyst',        email:'daniel.okafor@shieldx.io' },
+  { username:'reviewer', password:'reviewer123', name:'Lena Fischer',  role:'Reviewer',        email:'lena.fischer@shieldx.io' },
+  { username:'auditor',  password:'auditor123',  name:'Marcus Lee',    role:'Auditor',         email:'marcus.lee@shieldx.io' },
+];
+
+const ROLE_PERMISSIONS = {
+  'Administrator': { view:true, create:true, review:true, manageUsers:true, viewAudit:true, manageSettings:true },
+  'Analyst':       { view:true, create:true, review:false, manageUsers:false, viewAudit:true, manageSettings:false },
+  'Reviewer':      { view:true, create:false, review:true, manageUsers:false, viewAudit:true, manageSettings:false },
+  'Auditor':       { view:true, create:false, review:false, manageUsers:false, viewAudit:true, manageSettings:false },
+};
+const PERMISSION_LABELS = [
+  ['view','View Cases'], ['create','Create Screening'], ['review','Reviewer Decisions'],
+  ['manageUsers','Manage Users'], ['viewAudit','View Audit Logs'], ['manageSettings','Manage Settings'],
+];
+
+/* ---------------------------- document / risk vocab ---------------------------- */
+const DOC_TYPES = ['Passport','Driver\u2019s License','National ID Card','Residence Permit'];
+const NAMES = ['Rahul Mehta','Aisha Khan','Chen Wei','Maria Gomez','John Carter','Fatima Noor','David Kim','Olivia Brown','Ivan Petrov','Sara Ali','Grace Nakato','Tomás Rivera','Emily Chen','Noah Williams','Yuki Tanaka','Ahmed Hassan','Sofia Rossi','Liam O\u2019Connor','Nadia Osei','Mateus Silva'];
+const COUNTRIES = ['United States','India','United Kingdom','Canada','Germany','Brazil','Nigeria','Japan','UAE','Australia'];
+
+const FACTOR_DEFS = [
+  { key:'tamper',    name:'Document Tamper Score',        weight:25 },
+  { key:'ocr',       name:'OCR Data Consistency',         weight:10 },
+  { key:'identity',  name:'Cross-Document Identity Match', weight:20 },
+  { key:'voice',     name:'Voice Authenticity',           weight:15 },
+  { key:'source',    name:'Authorized Source Verification',weight:20 },
+  { key:'liveness',  name:'Selfie / Liveness Match',       weight:10 },
+];
+
+const SOURCE_CHECKS_DEF = ['National ID Registry','Telecom KYC Database','Sanctions & Watchlist Screen','Address Verification Bureau'];
+
+/* ---------------------------- global application state ---------------------------- */
+const state = {
+  authed: false,
+  currentUser: null,
+  view: 'dashboard',
+  caseFocusId: null,
+  sidebarOpen: false,
+  userMenuOpen: false,
+  cases: [],
+  auditLog: [],
+  filters: { q:'', risk:'All', status:'All', docType:'All' },
+  wizard: null,
+  settings: {
+    mfaEnabled: true,
+    encryptionAtRest: true,
+    tlsInTransit: true,
+    sessionTimeoutMin: 30,
+    retentionDays: 365,
+    anonymizeExports: true,
+    consentRequired: true,
+    rolePerms: JSON.parse(JSON.stringify(ROLE_PERMISSIONS)),
+  },
+  charts: {},
+};
+
+/* =========================================================================
+   DETERMINISTIC "AI" SIMULATION ENGINE
+   All scores are derived from a seed string (e.g. applicant name + id
+   number) via a seeded RNG so that the same inputs always reproduce the
+   same outputs — mirroring a deterministic backend inference call.
+   ========================================================================= */
+function runOcrExtraction(seed, applicant){
+  const rng = rngFor(seed+'|ocr');
+  const conf = () => Math.round((0.82 + rng()*0.17)*100);
+  return {
+    fields: [
+      { label:'Full Name', value: applicant.name, confidence: conf(), matchesInput:true },
+      { label:'Date of Birth', value: applicant.dob, confidence: conf(), matchesInput:true },
+      { label:'Document Number', value: applicant.idNumber, confidence: conf(), matchesInput:true },
+      { label:'Nationality', value: applicant.country, confidence: conf(), matchesInput:true },
+      { label:'Expiry Date', value: fmtDate(new Date(2026+rint(rng,0,6),rint(rng,0,11),rint(rng,1,28))), confidence: conf(), matchesInput:null },
+      { label:'Issuing Authority', value: pick(rng,['Dept. of Immigration','Regional Licensing Office','National Records Office','Passport Office']), confidence: conf(), matchesInput:null },
+    ],
+    avgConfidence: 0,
+  };
+}
+function runTamperAnalysis(seed){
+  const rng = rngFor(seed+'|tamper');
+  const risk = rng(); // 0..1
+  const checks = [
+    { name:'Font & kerning consistency', pass: rng() > risk*0.9 },
+    { name:'Edge & border irregularities', pass: rng() > risk*0.9 },
+    { name:'Metadata / EXIF consistency', pass: rng() > risk*0.85 },
+    { name:'Photo splice / overlay detection', pass: rng() > risk*0.95 },
+    { name:'Security pattern & microprint integrity', pass: rng() > risk },
+  ];
+  const failed = checks.filter(c=>!c.pass).length;
+  const score = clamp(Math.round(risk*100 + failed*4), 0, 100);
+  return { score, checks, flagged: failed>0 };
+}
+function runIdentityMatch(seed){
+  const rng = rngFor(seed+'|identity');
+  const base = 100 - Math.round(rng()*rng()*55);
+  return {
+    score: clamp(base,40,100),
+    fields:[
+      { label:'Name across documents', match: rng()>0.12 },
+      { label:'Date of birth consistency', match: rng()>0.08 },
+      { label:'Document number linkage', match: rng()>0.1 },
+      { label:'Address consistency', match: rng()>0.2 },
+    ],
+  };
+}
+function runVoiceAnalysis(seed, hasVoice){
+  const rng = rngFor(seed+'|voice');
+  if(!hasVoice){
+    return { provided:false, score:null, classification:'Not Submitted', flags:[] };
+  }
+  const synthRisk = rng();
+  const score = clamp(Math.round(100-synthRisk*100),0,100);
+  const classification = score>=70 ? 'Human (Live)' : score>=40 ? 'Uncertain' : 'Likely Synthetic';
+  const flags = [
+    { name:'Spectral artifact detection', pass: rng() > synthRisk*0.9 },
+    { name:'Natural cadence & pitch variance', pass: rng() > synthRisk*0.85 },
+    { name:'Background acoustic consistency', pass: rng() > synthRisk*0.8 },
+    { name:'Liveness challenge response', pass: rng() > synthRisk },
+  ];
+  return { provided:true, score, classification, flags };
+}
+function runSourceVerification(seed){
+  const rng = rngFor(seed+'|source');
+  return SOURCE_CHECKS_DEF.map(name=>{
+    const r = rng();
+    const status = r>0.78 ? 'Mismatch' : r>0.62 ? 'Not Found' : 'Verified';
+    return { name, status, ref: 'REF-'+rint(rng,100000,999999) };
+  });
+}
+function runLiveness(seed){
+  const rng = rngFor(seed+'|liveness');
+  const score = clamp(Math.round(60+rng()*40 - rng()*rng()*35),0,100);
+  return { score, passed: score>=60 };
+}
+
+function computeRiskFusion({ tamper, identity, voice, source, liveness, ocrAvg }){
+  const sourceRiskPct = (()=>{
+    const bad = source.filter(s=>s.status!=='Verified').length;
+    return clamp((bad/source.length)*100, 0, 100);
+  })();
+  const ocrRiskPct = clamp(100-ocrAvg, 0, 100);
+  const voiceRiskPct = voice.provided ? (100-voice.score) : 45; // neutral-ish penalty if not submitted
+  const identityRiskPct = 100-identity.score;
+  const livenessRiskPct = 100-liveness.score;
+  const tamperRiskPct = tamper.score;
+
+  const raw = {
+    tamper: tamperRiskPct, ocr: ocrRiskPct, identity: identityRiskPct,
+    voice: voiceRiskPct, source: sourceRiskPct, liveness: livenessRiskPct,
+  };
+  const factors = FACTOR_DEFS.map(f=>{
+    const riskPct = raw[f.key];
+    const contribution = Math.round((riskPct/100) * f.weight * 10)/10;
+    return { ...f, riskPct: Math.round(riskPct), contribution };
+  });
+  const score = clamp(Math.round(factors.reduce((s,f)=>s+f.contribution,0)), 0, 100);
+  const verdict = verdictFromScore(score);
+  return { score, verdict, factors };
+}
+
+function buildCaseAnalysis(applicant, docs, hasVoice, seedOverride){
+  const seed = seedOverride || (applicant.name+'|'+applicant.idNumber);
+  const ocr = runOcrExtraction(seed, applicant);
+  ocr.avgConfidence = Math.round(ocr.fields.reduce((s,f)=>s+f.confidence,0)/ocr.fields.length);
+  const tamper = runTamperAnalysis(seed);
+  const identity = runIdentityMatch(seed);
+  const voice = runVoiceAnalysis(seed, hasVoice);
+  const source = runSourceVerification(seed);
+  const liveness = runLiveness(seed);
+  const fusion = computeRiskFusion({ tamper, identity, voice, source, liveness, ocrAvg: ocr.avgConfidence });
+  return { seed, ocr, tamper, identity, voice, source, liveness, fusion, docs };
+}
+
+/* ---------------------------- demo case seeding ---------------------------- */
+function seedDemoCases(){
+  const cases = [];
+  for(let i=0;i<14;i++){
+    const rng = rngFor('seed-case-'+i);
+    const name = NAMES[i % NAMES.length];
+    const country = pick(rng, COUNTRIES);
+    const docType = pick(rng, DOC_TYPES);
+    const idNumber = (pick(rng,['A','B','C','D','E'])+rint(rng,100000,999999)).toUpperCase();
+    const dob = fmtDate(new Date(rint(rng,1965,2002), rint(rng,0,11), rint(rng,1,28)));
+    const applicant = { name, dob, idNumber, country };
+    const hasVoice = rng() > 0.15;
+    const analysis = buildCaseAnalysis(applicant, [
+      { type: docType, filename: docType.replace(/[^a-zA-Z]/g,'')+'_front.jpg' },
+      { type:'Selfie Photo', filename:'selfie.jpg' },
+    ], hasVoice, 'seed-case-'+i);
+    const submitted = daysAgo(rint(rng,0,29));
+    const analyst = pick(rng, DEMO_USERS.filter(u=>u.role==='Analyst'||u.role==='Administrator'));
+    let status = 'Pending Review';
+    const roll = rng();
+    if(analysis.fusion.verdict==='Genuine') status = roll>0.25 ? 'Approved' : 'Pending Review';
+    else if(analysis.fusion.verdict==='Suspicious') status = roll>0.6 ? 'Escalated' : (roll>0.3 ? 'Pending Review':'Approved');
+    else status = roll>0.35 ? 'Rejected' : 'Escalated';
+
+    const auditTrail = [
+      { time: submitted, actor: analyst.name, role: analyst.role, action:'Screening Submitted', note:`Case created for ${name} (${docType}).` },
+      { time: new Date(submitted.getTime()+6*60000), actor:'ShieldX Engine', role:'System', action:'Risk Fusion Complete', note:`Risk score ${analysis.fusion.score} — ${analysis.fusion.verdict}.` },
+    ];
+    if(status!=='Pending Review'){
+      const reviewer = pick(rng, DEMO_USERS.filter(u=>u.role==='Reviewer'||u.role==='Administrator'));
+      auditTrail.push({ time: new Date(submitted.getTime()+3600000*rint(rng,1,20)), actor:reviewer.name, role:reviewer.role,
+        action: status==='Approved' ? 'Case Approved' : status==='Rejected' ? 'Case Rejected' : 'Case Escalated',
+        note: status==='Approved' ? 'Reviewed and confirmed genuine identity.' : status==='Rejected' ? 'Confirmed fraudulent indicators; application rejected.' : 'Escalated for senior review due to conflicting signals.' });
+    }
+    cases.push({
+      id: 'SX-'+(1000+i),
+      applicant, docType, submitted, status, analysis,
+      riskScore: analysis.fusion.score, riskLevel: analysis.fusion.verdict,
+      analyst: analyst.name, reviewer: status!=='Pending Review' ? auditTrail[auditTrail.length-1].actor : null,
+      auditTrail,
+    });
+  }
+  cases.sort((a,b)=>b.submitted-a.submitted);
+  return cases;
+}
+
+function logAudit(action, note, caseId){
+  state.auditLog.unshift({
+    id: uid('LOG'),
+    time: new Date(),
+    actor: state.currentUser ? state.currentUser.name : 'System',
+    role: state.currentUser ? state.currentUser.role : '-',
+    action, note: note||'', caseId: caseId||null,
+  });
+}
+
+/* =========================================================================
+   TOASTS
+   ========================================================================= */
+function toast(msg, type){
+  const host = document.getElementById('toastHost');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type||'ok');
+  const ic = type==='err' ? icon('x') : type==='warn' ? icon('alert') : icon('check');
+  el.innerHTML = `<span style="opacity:.85">${ic}</span><span>${esc(msg)}</span>`;
+  host.appendChild(el);
+  setTimeout(()=>{ el.style.transition='.3s'; el.style.opacity='0'; el.style.transform='translateY(6px)'; setTimeout(()=>el.remove(),300); }, 3200);
+}
+
+/* =========================================================================
+   ROUTER / MAIN RENDER
+   ========================================================================= */
+function navigate(view, params){
+  state.view = view;
+  state.sidebarOpen = false;
+  if(params && params.caseId) state.caseFocusId = params.caseId;
+  if(view!=='new-screening') state.wizard = null;
+  window.scrollTo(0,0);
+  render();
+}
+function openCase(id){ navigate('case-detail', { caseId:id }); }
+
+function render(){
+  const app = document.getElementById('app');
+  if(!state.authed){
+    app.innerHTML = renderLogin();
+    attachLoginHandlers();
+    return;
+  }
+  app.innerHTML = renderShell();
+  attachShellHandlers();
+}
+
+/* =========================================================================
+   LOGIN VIEW
+   ========================================================================= */
+function renderLogin(){
+  return `
+  <div class="login-wrap">
+    <div class="login-aside">
+      <div class="brand-mark">${icon('logo')} ShieldX</div>
+      <div>
+        <h1 class="login-headline">Intelligent Identity &amp; Document Risk Screening</h1>
+        <p class="login-copy">Detect forged documents, synthetic voices and identity mismatches before they become your problem — with an explainable risk score behind every decision.</p>
+        <div class="login-stats">
+          <div class="login-stat"><b>${state.cases.length ? state.cases.length : 14}+</b><span>Cases screened</span></div>
+          <div class="login-stat"><b>6</b><span>Risk signal engines</span></div>
+          <div class="login-stat"><b>99.9%</b><span>Platform uptime</span></div>
+        </div>
+      </div>
+      <div class="text-xs" style="color:#5E7191;">© ${new Date().getFullYear()} ShieldX Technologies. All rights reserved.</div>
+    </div>
+    <div class="login-form-side">
+      <div class="login-box">
+        <div class="brand-mark" style="margin-bottom:26px;color:var(--ink-900);">${icon('logo')} ShieldX</div>
+        <h2>Sign in to your workspace</h2>
+        <p class="sub">Enter your credentials to access the screening console.</p>
+        <div class="login-error" id="loginError">Invalid username or password. Try one of the demo accounts below.</div>
+        <form id="loginForm">
+          <div class="field">
+            <label class="field-label">Username</label>
+            <input class="input" id="loginUser" placeholder="e.g. admin" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label class="field-label">Password</label>
+            <input class="input" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">${icon('lock')} Sign in securely</button>
+        </form>
+        <p class="text-xs text-faint" style="margin-top:16px;">Demo workspace — quick-fill a role to explore:</p>
+        <div class="demo-creds">
+          ${DEMO_USERS.map(u=>`<div class="demo-cred-btn" data-user="${u.username}" data-pass="${u.password}">${u.role}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function attachLoginHandlers(){
+  document.getElementById('loginForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const u = document.getElementById('loginUser').value.trim().toLowerCase();
+    const p = document.getElementById('loginPass').value;
+    const found = DEMO_USERS.find(x=>x.username===u && x.password===p);
+    if(found){ doLogin(found); }
+    else { document.getElementById('loginError').style.display='block'; }
+  });
+  document.querySelectorAll('.demo-cred-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.getElementById('loginUser').value = btn.dataset.user;
+      document.getElementById('loginPass').value = btn.dataset.pass;
+    });
+  });
+}
+function doLogin(user){
+  state.authed = true;
+  state.currentUser = user;
+  state.view = 'dashboard';
+  logAudit('Login', `${user.name} signed in.`);
+  render();
+  toast(`Welcome back, ${user.name.split(' ')[0]}.`, 'ok');
+}
+function doLogout(){
+  logAudit('Logout', `${state.currentUser.name} signed out.`);
+  state.authed = false;
+  state.currentUser = null;
+  state.userMenuOpen = false;
+  render();
+}
+
+/* =========================================================================
+   APP SHELL
+   ========================================================================= */
+const NAV_ITEMS = [
+  { id:'dashboard', label:'Dashboard', icon:'dashboard' },
+  { id:'new-screening', label:'New Screening', icon:'scan' },
+  { id:'cases', label:'Case Management', icon:'cases' },
+  { id:'audit', label:'Audit Logs', icon:'audit', perm:'viewAudit' },
+  { id:'settings', label:'Settings', icon:'settings', perm:'manageSettings', altAllow:true },
+];
+const VIEW_TITLES = {
+  dashboard:'Dashboard', 'new-screening':'New Screening', cases:'Case Management',
+  'case-detail':'Case Detail', audit:'Audit Logs', settings:'Settings',
+};
+
+function renderShell(){
+  const perms = ROLE_PERMISSIONS[state.currentUser.role];
+  const navHtml = NAV_ITEMS.map(item=>{
+    if(item.perm && !perms[item.perm] && !item.altAllow) return '';
+    if(item.id==='settings' && !perms.manageSettings && !perms.viewAudit) return '';
+    return `<div class="nav-item ${state.view===item.id?'active':''}" data-nav="${item.id}">${icon(item.icon)}<span>${item.label}</span></div>`;
+  }).join('');
+
+  return `
+  <div class="app-shell">
+    <div class="sidebar-scrim ${state.sidebarOpen?'show':''}" id="sidebarScrim"></div>
+    <aside class="sidebar ${state.sidebarOpen?'open':''}" id="sidebar">
+      <div class="sidebar-brand">${icon('logo')} ShieldX</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-label">Workspace</div>
+        ${navHtml}
+      </nav>
+      <div class="sidebar-foot">
+        <div style="display:flex;align-items:center;gap:6px;color:#8FA0BC;">${icon('lock')} AES-256 encrypted session</div>
+      </div>
+    </aside>
+    <div class="main-col">
+      <header class="topbar">
+        <div class="flex items-center">
+          <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">${icon('menu')}</button>
+          <div class="topbar-title">${VIEW_TITLES[state.view]||''}</div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-icon btn-ghost" title="Notifications" style="position:relative;">
+            ${icon('bell')}
+            ${state.cases.filter(c=>c.status==='Pending Review').length ? '<span style="position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--danger);"></span>' : ''}
+          </button>
+          <div class="user-chip" id="userChipBtn">
+            <div class="avatar">${initials(state.currentUser.name)}</div>
+            <div>
+              <div class="uname">${state.currentUser.name}</div>
+              <div class="urole">${state.currentUser.role}</div>
+            </div>
+            ${icon('chev')}
+            <div class="user-menu ${state.userMenuOpen?'open':''}" id="userMenu">
+              <button data-nav="settings">${icon('settings')} Account &amp; Settings</button>
+              <button id="logoutBtn">${icon('x')} Sign out</button>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="content" id="contentArea">
+        ${renderView()}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderView(){
+  switch(state.view){
+    case 'dashboard': return renderDashboard();
+    case 'new-screening': return renderNewScreening();
+    case 'cases': return renderCases();
+    case 'case-detail': return renderCaseDetail();
+    case 'audit': return renderAuditView();
+    case 'settings': return renderSettings();
+    default: return renderDashboard();
+  }
+}
+
+function attachShellHandlers(){
+  document.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click', ()=> navigate(el.dataset.nav));
+  });
+  const ham = document.getElementById('hamburgerBtn');
+  if(ham) ham.addEventListener('click', ()=>{ state.sidebarOpen = true; render(); });
+  const scrim = document.getElementById('sidebarScrim');
+  if(scrim) scrim.addEventListener('click', ()=>{ state.sidebarOpen = false; render(); });
+  const chip = document.getElementById('userChipBtn');
+  if(chip) chip.addEventListener('click', (e)=>{ e.stopPropagation(); state.userMenuOpen = !state.userMenuOpen; render(); });
+  const logoutBtn = document.getElementById('logoutBtn');
+  if(logoutBtn) logoutBtn.addEventListener('click', doLogout);
+  document.addEventListener('click', function outsideClose(e){
+    if(state.userMenuOpen && !e.target.closest('.user-chip')){ state.userMenuOpen=false; render(); }
+  }, { once:true });
+
+  attachViewHandlers();
+  renderChartsForView();
+}
+
+function renderCaseDetailCharts(){ /* case detail uses inline bar rows, not canvas charts */ }
+
+/* =========================================================================
+   VIEW EVENT DISPATCHER
+   ========================================================================= */
+function attachViewHandlers(){
+  // generic row-open (dashboard recent cases + case list)
+  document.querySelectorAll('[data-open-case]').forEach(row=>{
+    row.addEventListener('click', ()=> openCase(row.dataset.openCase));
+  });
+
+  if(state.view==='new-screening') attachWizardHandlers();
+
+  if(state.view==='cases'){
+    const search = document.getElementById('caseSearch');
+    if(search) search.addEventListener('input', ()=>{ state.filters.q = search.value; render(); });
+    const fr = document.getElementById('filterRisk'); if(fr) fr.addEventListener('change', ()=>{ state.filters.risk=fr.value; render(); });
+    const fs = document.getElementById('filterStatus'); if(fs) fs.addEventListener('change', ()=>{ state.filters.status=fs.value; render(); });
+    const fd = document.getElementById('filterDoc'); if(fd) fd.addEventListener('change', ()=>{ state.filters.docType=fd.value; render(); });
+    const clear = document.getElementById('clearFilters'); if(clear) clear.addEventListener('click', ()=>{ state.filters={q:'',risk:'All',status:'All',docType:'All'}; render(); });
+  }
+
+  if(state.view==='case-detail'){
+    document.querySelectorAll('[data-tab]').forEach(b=> b.addEventListener('click', ()=>{ caseDetailState.tab=b.dataset.tab; render(); }));
+    const jump = document.querySelector('[data-tab-jump]');
+    if(jump) jump.addEventListener('click', ()=>{ caseDetailState.tab='report'; render(); });
+    document.querySelectorAll('[data-decide]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const c = state.cases.find(x=>x.id===state.caseFocusId);
+        recordReviewDecision(c, b.dataset.decide);
+      });
+    });
+    const dl = document.getElementById('downloadReportBtn');
+    if(dl) dl.addEventListener('click', ()=>{ downloadReport(state.cases.find(x=>x.id===state.caseFocusId)); });
+  }
+
+  if(state.view==='audit'){
+    const s = document.getElementById('auditSearch'); if(s) s.addEventListener('input', ()=>{ auditFilterState.q=s.value; render(); });
+    const a = document.getElementById('auditActionFilter'); if(a) a.addEventListener('change', ()=>{ auditFilterState.action=a.value; render(); });
+  }
+
+  if(state.view==='settings') attachSettingsHandlers();
+}
+
+/* =========================================================================
+   SHARED COMPONENT: risk gauge (signature element)
+   ========================================================================= */
+function gaugeSvg(score, size){
+  size = size || 200;
+  const cx = size/2, cy = size/2, r = size*0.4;
+  const startAngle = Math.PI, endAngle = 0; // semicircle, left to right (top half)
+  function pt(angle, radius){ return [cx + radius*Math.cos(angle), cy - radius*Math.sin(angle)]; }
+  function arcPath(a0, a1, radius){
+    const [x0,y0] = pt(a0, radius), [x1,y1] = pt(a1, radius);
+    const large = Math.abs(a1-a0) > Math.PI ? 1 : 0;
+    return `M ${x0} ${y0} A ${radius} ${radius} 0 ${large} 0 ${x1} ${y1}`;
+  }
+  // 3 zones over the semicircle: genuine(0-30%), suspicious(30-60%), high(60-100%) mapped across PI..0
+  const zones = [
+    { from:0, to:0.30, color:'var(--safe)' },
+    { from:0.30, to:0.60, color:'var(--warn)' },
+    { from:0.60, to:1.0, color:'var(--danger)' },
+  ];
+  const zonePaths = zones.map(z=>{
+    const a0 = Math.PI - z.from*Math.PI, a1 = Math.PI - z.to*Math.PI;
+    return `<path d="${arcPath(a0,a1,r)}" stroke="${z.color}" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.9"/>`;
+  }).join('');
+  const needleAngle = Math.PI - (score/100)*Math.PI;
+  const needleLen = r*0.86;
+  const [nx,ny] = pt(needleAngle, needleLen);
+  return `<svg viewBox="0 0 ${size} ${size*0.62}" width="${size}" height="${size*0.62}">
+    ${zonePaths}
+    <circle cx="${cx}" cy="${cy}" r="5" fill="var(--ink-900)"/>
+    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="var(--ink-900)" stroke-width="3" stroke-linecap="round"/>
+  </svg>`;
+}
+function gaugeBlock(score, verdict, size){
+  return `<div class="gauge-wrap">
+    ${gaugeSvg(score, size||200)}
+    <div class="gauge-score" style="color:var(${verdictColorVar(verdict)})">${score}</div>
+    <div class="gauge-verdict"><span class="badge ${verdictBadgeClass(verdict)}">${verdict}</span></div>
+    <div class="gauge-label">Composite risk score / 100</div>
+  </div>`;
+}
+
+/* =========================================================================
+   AUDIT LOG VIEW
+   ========================================================================= */
+const auditFilterState = { q:'', action:'All' };
+function renderAuditView(){
+  const actions = ['All', ...Array.from(new Set(state.auditLog.map(l=>l.action)))];
+  const list = state.auditLog.filter(l=>{
+    if(auditFilterState.action!=='All' && l.action!==auditFilterState.action) return false;
+    if(auditFilterState.q){
+      const q = auditFilterState.q.toLowerCase();
+      if(!(l.actor+' '+l.action+' '+l.note+' '+(l.caseId||'')).toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+  return `
+  <div class="flex justify-between items-center" style="margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h2 style="margin:0 0 4px;font-size:21px;">Audit Logs</h2>
+      <p class="text-muted text-sm" style="margin:0;">Immutable record of every login, screening and reviewer action across the platform.</p>
+    </div>
+  </div>
+  <div class="card card-pad" style="margin-bottom:16px;">
+    <div class="filter-bar">
+      <div class="search-input-wrap">${icon('search')}<input class="input" id="auditSearch" placeholder="Search logs by actor, action or case…" value="${esc(auditFilterState.q)}"></div>
+      <select class="input" id="auditActionFilter">${actions.map(a=>`<option ${auditFilterState.action===a?'selected':''}>${a}</option>`).join('')}</select>
+    </div>
+  </div>
+  <div class="card card-pad">
+    ${list.length ? `<div class="timeline">
+      ${list.map(l=>`
+        <div class="tl-item">
+          <div class="tl-title">${l.action} <span class="text-faint text-xs">— ${esc(l.actor)} (${l.role})${l.caseId?' · '+l.caseId:''}</span></div>
+          <div class="tl-meta">${fmtDateTime(l.time)}</div>
+          ${l.note ? `<div class="tl-note">${esc(l.note)}</div>` : ''}
+        </div>`).join('')}
+    </div>` : `<div class="empty-state">${icon('audit')}<p>No audit entries match your search.</p></div>`}
+  </div>`;
+}
+
+/* =========================================================================
+   SETTINGS VIEW
+   ========================================================================= */
+const settingsState = { tab:'rbac' };
+function renderSettings(){
+  const perms = ROLE_PERMISSIONS[state.currentUser.role];
+  const tabs = [['rbac','Roles & Access'],['security','Security & Encryption'],['privacy','Privacy Controls'],['about','About']];
+  return `
+  <h2 style="margin:0 0 4px;font-size:21px;">Settings</h2>
+  <p class="text-muted text-sm" style="margin:0 0 18px;">Manage access control, encryption posture and data privacy for the ShieldX workspace.</p>
+  <div class="tabs">${tabs.map(([id,label])=>`<button class="tab-btn ${settingsState.tab===id?'active':''}" data-stab="${id}">${label}</button>`).join('')}</div>
+  ${settingsState.tab==='rbac' ? renderSettingsRbac(perms) : ''}
+  ${settingsState.tab==='security' ? renderSettingsSecurity(perms) : ''}
+  ${settingsState.tab==='privacy' ? renderSettingsPrivacy(perms) : ''}
+  ${settingsState.tab==='about' ? renderSettingsAbout() : ''}
+  `;
+}
+
+function renderSettingsRbac(perms){
+  const roles = Object.keys(ROLE_PERMISSIONS);
+  return `
+  <div class="card card-pad" style="margin-bottom:16px;">
+    <div class="section-title">Role-based access control</div>
+    <div class="section-sub">Permission matrix applied across the ShieldX workspace. ${perms.manageUsers?'As an Administrator you can toggle permissions below.':'Contact an Administrator to change role permissions.'}</div>
+    <div class="scroll-x">
+    <table class="perm-table">
+      <thead><tr><th>Permission</th>${roles.map(r=>`<th>${r}</th>`).join('')}</tr></thead>
+      <tbody>
+        ${PERMISSION_LABELS.map(([key,label])=>`
+          <tr><td>${label}</td>
+            ${roles.map(r=>`<td>
+              <label class="toggle"><input type="checkbox" data-perm-role="${r}" data-perm-key="${key}" ${state.settings.rolePerms[r][key]?'checked':''} ${perms.manageUsers?'':'disabled'}><span class="slider"></span></label>
+            </td>`).join('')}
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card card-pad">
+    <div class="section-title">Workspace users</div>
+    <div class="section-sub">Demo accounts provisioned for this workspace.</div>
+    <div class="scroll-x">
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Email</th></tr></thead>
+      <tbody>
+        ${DEMO_USERS.map(u=>`<tr>
+          <td data-label="Name"><div class="flex items-center gap-8"><div class="avatar" style="width:26px;height:26px;font-size:10.5px;">${initials(u.name)}</div>${u.name}</div></td>
+          <td data-label="Username" class="mono text-sm">${u.username}</td>
+          <td data-label="Role"><span class="badge badge-brand">${u.role}</span></td>
+          <td data-label="Email" class="text-sm text-muted">${u.email}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>
+  </div>`;
+}
+
+function renderSettingsSecurity(perms){
+  const s = state.settings;
+  function toggleRow(id, label, sub, val, disabled){
+    return `<div class="check-row">
+      <div><div class="check-left" style="font-weight:700;">${label}</div><div class="text-xs text-muted" style="margin-top:2px;">${sub}</div></div>
+      <label class="toggle"><input type="checkbox" id="${id}" ${val?'checked':''} ${disabled?'disabled':''}><span class="slider"></span></label>
+    </div>`;
+  }
+  return `
+  <div class="dash-grid" style="grid-template-columns:1fr 1fr;">
+    <div class="card card-pad">
+      <div class="section-title">Encryption</div>
+      <div class="section-sub">Data protection posture for stored and in-transit case data.</div>
+      ${toggleRow('toggleEncryptionAtRest','Encryption at rest (AES-256)','All documents, voice samples and case data encrypted on disk.', s.encryptionAtRest, !perms.manageSettings)}
+      ${toggleRow('toggleTls','TLS 1.3 in transit','All API and upload traffic is encrypted end-to-end.', s.tlsInTransit, !perms.manageSettings)}
+      ${toggleRow('toggleMfa','Multi-factor authentication','Require a second factor for Administrator and Reviewer roles.', s.mfaEnabled, !perms.manageSettings)}
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">Session policy</div>
+      <div class="section-sub">Controls for idle session handling.</div>
+      <div class="field">
+        <label class="field-label">Session timeout: <strong id="sessionTimeoutVal">${s.sessionTimeoutMin} minutes</strong></label>
+        <input type="range" min="5" max="120" step="5" value="${s.sessionTimeoutMin}" class="slider-range" id="sessionTimeoutSlider" ${perms.manageSettings?'':'disabled'}>
+      </div>
+      <div class="text-xs text-muted">Sessions are automatically terminated after this period of inactivity, requiring re-authentication.</div>
+    </div>
+  </div>
+  <div class="card card-pad" style="margin-top:16px;">
+    <div class="section-title">Encryption status</div>
+    <div class="upload-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));">
+      ${[['Data at rest', s.encryptionAtRest],['Data in transit', s.tlsInTransit],['MFA enforced', s.mfaEnabled]].map(([l,v])=>`
+        <div class="card card-pad" style="border-style:dashed;text-align:center;">
+          <div class="check-icon" style="margin:0 auto 8px;background:${v?'var(--safe-soft)':'var(--danger-soft)'};color:${v?'var(--safe)':'var(--danger)'}">${icon(v?'check':'x')}</div>
+          <div class="text-sm" style="font-weight:700;">${l}</div>
+          <div class="text-xs text-muted">${v?'Active':'Disabled'}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderSettingsPrivacy(perms){
+  const s = state.settings;
+  return `
+  <div class="dash-grid" style="grid-template-columns:1fr 1fr;">
+    <div class="card card-pad">
+      <div class="section-title">Data retention</div>
+      <div class="section-sub">How long screening case data is retained before automatic purge.</div>
+      <div class="field">
+        <label class="field-label">Retention period: <strong id="retentionVal">${s.retentionDays} days</strong></label>
+        <input type="range" min="30" max="1095" step="30" value="${s.retentionDays}" class="slider-range" id="retentionSlider" ${perms.manageSettings?'':'disabled'}>
+      </div>
+      <div class="check-row">
+        <div><div class="check-left" style="font-weight:700;">Anonymize exported reports</div><div class="text-xs text-muted">Mask document numbers and DOB in downloaded reports.</div></div>
+        <label class="toggle"><input type="checkbox" id="toggleAnonymize" ${s.anonymizeExports?'checked':''} ${perms.manageSettings?'':'disabled'}><span class="slider"></span></label>
+      </div>
+      <div class="check-row">
+        <div><div class="check-left" style="font-weight:700;">Require applicant consent</div><div class="text-xs text-muted">Block screening submission without recorded consent.</div></div>
+        <label class="toggle"><input type="checkbox" id="toggleConsent" ${s.consentRequired?'checked':''} ${perms.manageSettings?'':'disabled'}><span class="slider"></span></label>
+      </div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">Right to erasure</div>
+      <div class="section-sub">Anonymize a specific case's personally identifiable information on request.</div>
+      <div class="field">
+        <label class="field-label">Select case</label>
+        <select class="input" id="erasureCaseSelect">
+          ${state.cases.map(c=>`<option value="${c.id}">${c.id} — ${esc(c.applicant.name)}</option>`).join('')}
+        </select>
+      </div>
+      <button class="btn btn-outline btn-block" id="erasureBtn" ${perms.manageSettings?'':'disabled'}>${icon('lock')} Anonymize applicant data</button>
+    </div>
+  </div>`;
+}
+
+function renderSettingsAbout(){
+  return `
+  <div class="card card-pad">
+    <div class="section-title">Platform architecture</div>
+    <div class="section-sub">Reference architecture for the ShieldX identity risk screening platform.</div>
+    <div class="kv-list">
+      <div class="kv-item"><span class="k">Frontend</span><span class="v">React / HTML / CSS / JS, responsive across desktop, tablet and mobile</span></div>
+      <div class="kv-item"><span class="k">Backend API</span><span class="v">Python + FastAPI service layer</span></div>
+      <div class="kv-item"><span class="k">OCR Engine</span><span class="v">PaddleOCR / Tesseract</span></div>
+      <div class="kv-item"><span class="k">Image Forensics</span><span class="v">OpenCV-based tamper &amp; splice detection</span></div>
+      <div class="kv-item"><span class="k">Data Store</span><span class="v">PostgreSQL</span></div>
+      <div class="kv-item"><span class="k">This build</span><span class="v">Interactive prototype — deterministic demo analysis logic</span></div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================================
+   BOOTSTRAP
+   ========================================================================= */
+function initApp(){
+  state.cases = seedDemoCases();
+  logAudit('System Initialized', 'ShieldX workspace provisioned with demo case data.');
+  render();
+}
+initApp();
+
+function attachSettingsHandlers(){
+  document.querySelectorAll('[data-stab]').forEach(b=> b.addEventListener('click', ()=>{ settingsState.tab = b.dataset.stab; render(); }));
+  document.querySelectorAll('[data-perm-role]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      state.settings.rolePerms[cb.dataset.permRole][cb.dataset.permKey] = cb.checked;
+      logAudit('RBAC Updated', `${cb.dataset.permKey} for ${cb.dataset.permRole} set to ${cb.checked}.`);
+      toast('Permission updated.', 'ok');
+    });
+  });
+  const bindToggle = (id, path)=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change', ()=>{ state.settings[path]=el.checked; logAudit('Settings Updated', `${path} set to ${el.checked}.`); toast('Setting saved.','ok'); });
+  };
+  bindToggle('toggleEncryptionAtRest','encryptionAtRest');
+  bindToggle('toggleTls','tlsInTransit');
+  bindToggle('toggleMfa','mfaEnabled');
+  bindToggle('toggleAnonymize','anonymizeExports');
+  bindToggle('toggleConsent','consentRequired');
+  const timeoutSlider = document.getElementById('sessionTimeoutSlider');
+  if(timeoutSlider) timeoutSlider.addEventListener('input', ()=>{ document.getElementById('sessionTimeoutVal').textContent = timeoutSlider.value+' minutes'; state.settings.sessionTimeoutMin = +timeoutSlider.value; });
+  const retentionSlider = document.getElementById('retentionSlider');
+  if(retentionSlider) retentionSlider.addEventListener('input', ()=>{ document.getElementById('retentionVal').textContent = retentionSlider.value+' days'; state.settings.retentionDays = +retentionSlider.value; });
+  const erasureBtn = document.getElementById('erasureBtn');
+  if(erasureBtn) erasureBtn.addEventListener('click', ()=>{
+    const id = document.getElementById('erasureCaseSelect').value;
+    const c = state.cases.find(x=>x.id===id);
+    if(!c) return;
+    c.applicant.name = 'ANONYMIZED';
+    c.applicant.idNumber = '••••••••';
+    c.applicant.dob = '••••••••';
+    c.auditTrail.push({ time:new Date(), actor:state.currentUser.name, role:state.currentUser.role, action:'Data Anonymized', note:`Applicant PII anonymized per erasure request for ${id}.` });
+    logAudit('Data Anonymized', `PII anonymized for case ${id}.`, id);
+    toast(`Case ${id} anonymized.`, 'ok');
+    render();
+  });
+}
+
+/* =========================================================================
+   CASE DETAIL
+   ========================================================================= */
+const caseDetailState = { tab:'overview' };
+
+function renderCaseDetail(){
+  const c = state.cases.find(x=>x.id===state.caseFocusId);
+  if(!c){
+    return `<div class="empty-state">${icon('alert')}<p>Case not found.</p><button class="btn btn-outline" data-nav="cases">Back to cases</button></div>`;
+  }
+  const r = c.analysis;
+  const perms = ROLE_PERMISSIONS[state.currentUser.role];
+  const tabs = [['overview','Overview'],['analysis','Analysis'],['audit','Audit Trail'],['report','Report']];
+
+  return `
+  <div class="flex justify-between items-center" style="margin-bottom:10px;flex-wrap:wrap;gap:12px;">
+    <div>
+      <button class="btn btn-ghost btn-sm" data-nav="cases" style="margin-bottom:8px;padding-left:0;">${icon('chev').replace('polyline points="9 18 15 12 9 6"','polyline points="15 18 9 12 15 6"')} Back to cases</button>
+      <div class="flex items-center gap-12" style="flex-wrap:wrap;">
+        <h2 style="margin:0;font-size:21px;">${esc(c.applicant.name)}</h2>
+        <span class="case-id">${c.id}</span>
+        <span class="badge ${verdictBadgeClass(c.riskLevel)}">${c.riskLevel}</span>
+        <span class="badge ${statusBadgeClass(c.status)}">${c.status}</span>
+      </div>
+    </div>
+    <div class="flex gap-12">
+      <button class="btn btn-outline" data-tab-jump="report">${icon('download')} Generate Report</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    ${tabs.map(([id,label])=>`<button class="tab-btn ${caseDetailState.tab===id?'active':''}" data-tab="${id}">${label}</button>`).join('')}
+  </div>
+
+  ${caseDetailState.tab==='overview' ? renderCaseOverviewTab(c, perms) : ''}
+  ${caseDetailState.tab==='analysis' ? renderCaseAnalysisTab(c) : ''}
+  ${caseDetailState.tab==='audit' ? renderCaseAuditTab(c) : ''}
+  ${caseDetailState.tab==='report' ? renderCaseReportTab(c) : ''}
+  `;
+}
+
+function renderCaseOverviewTab(c, perms){
+  const r = c.analysis;
+  return `
+  <div class="dash-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px;">
+    <div class="card card-pad">
+      <div class="section-title">Applicant information</div>
+      <div class="kv-list">
+        <div class="kv-item"><span class="k">Full name</span><span class="v">${esc(c.applicant.name)}</span></div>
+        <div class="kv-item"><span class="k">Date of birth</span><span class="v">${esc(c.applicant.dob)}</span></div>
+        <div class="kv-item"><span class="k">Document number</span><span class="v mono">${esc(c.applicant.idNumber)}</span></div>
+        <div class="kv-item"><span class="k">Country / region</span><span class="v">${esc(c.applicant.country)}</span></div>
+        <div class="kv-item"><span class="k">Document type</span><span class="v">${c.docType}</span></div>
+        <div class="kv-item"><span class="k">Submitted</span><span class="v">${fmtDateTime(c.submitted)}</span></div>
+        <div class="kv-item"><span class="k">Analyst</span><span class="v">${esc(c.analyst)}</span></div>
+        <div class="kv-item"><span class="k">Reviewer</span><span class="v">${esc(c.reviewer||'Unassigned')}</span></div>
+      </div>
+    </div>
+    <div class="card card-pad flex-col items-center" style="justify-content:center;">
+      ${gaugeBlock(c.riskScore, c.riskLevel, 220)}
+    </div>
+  </div>
+
+  <div class="card card-pad" style="margin-bottom:16px;">
+    <div class="section-title">Risk factor breakdown</div>
+    <div class="section-sub">Explainable contribution of each signal engine to the final score.</div>
+    ${r.fusion.factors.map(fc=>`
+      <div class="factor-row">
+        <div class="factor-name">${fc.name}</div>
+        <div class="factor-bar-track"><div class="factor-bar-fill" style="width:${fc.riskPct}%;background:${fc.riskPct>60?'var(--danger)':fc.riskPct>30?'var(--warn)':'var(--safe)'}"></div></div>
+        <div class="factor-pts">+${fc.contribution.toFixed(1)}</div>
+      </div>`).join('')}
+  </div>
+
+  ${perms.review ? `
+  <div class="card card-pad">
+    <div class="section-title">Reviewer validation</div>
+    <div class="section-sub">Record or update the human decision for this case. Every action is written to the audit trail.</div>
+    <div class="field"><textarea class="input" id="caseReviewNote" rows="2" placeholder="Add a reviewer note (required for reject/escalate)"></textarea></div>
+    <div class="flex gap-12" style="flex-wrap:wrap;">
+      <button class="btn btn-safe btn-sm" data-decide="Approved">${icon('check')} Approve</button>
+      <button class="btn btn-warn btn-sm" data-decide="Escalated">${icon('alert')} Escalate</button>
+      <button class="btn btn-danger btn-sm" data-decide="Rejected">${icon('x')} Reject</button>
+    </div>
+  </div>` : `<div class="card card-pad text-sm text-muted">Your role (${state.currentUser.role}) has view-only access to this case.</div>`}
+  `;
+}
+
+function renderCaseAnalysisTab(c){
+  return renderAnalysisSections(c.analysis);
+}
+
+function renderCaseAuditTab(c){
+  return `
+  <div class="card card-pad">
+    <div class="section-title">Case audit trail</div>
+    <div class="section-sub">Immutable, timestamped record of every automated and human action on this case.</div>
+    <div class="timeline" style="margin-top:16px;">
+      ${c.auditTrail.slice().reverse().map(t=>`
+        <div class="tl-item">
+          <div class="tl-title">${t.action} <span class="text-faint text-xs">— ${esc(t.actor)} (${t.role})</span></div>
+          <div class="tl-meta">${fmtDateTime(t.time)}</div>
+          ${t.note ? `<div class="tl-note">${esc(t.note)}</div>` : ''}
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderCaseReportTab(c){
+  const r = c.analysis;
+  return `
+  <div class="card card-pad">
+    <div class="flex justify-between items-center" style="margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div class="section-title" style="margin-bottom:0;">Screening report</div>
+        <div class="section-sub" style="margin-bottom:0;">Generated on demand from live case data.</div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="downloadReportBtn">${icon('download')} Download report (.html)</button>
+    </div>
+    <div class="report-preview" id="reportPrintArea">
+      ${buildReportHtml(c)}
+    </div>
+  </div>`;
+}
+
+function buildReportHtml(c){
+  const r = c.analysis;
+  return `
+    <div class="flex justify-between items-center">
+      <div><strong style="font-size:16px;">ShieldX Screening Report</strong><div class="text-xs text-faint">Case ${c.id} · Generated ${fmtDateTime(new Date())}</div></div>
+      <span class="badge ${verdictBadgeClass(c.riskLevel)}">${c.riskLevel}</span>
+    </div>
+    <hr class="hr-line">
+    <h3 style="font-size:14px;">Applicant</h3>
+    <div class="kv-list">
+      <div class="kv-item"><span class="k">Name</span><span class="v">${esc(c.applicant.name)}</span></div>
+      <div class="kv-item"><span class="k">DOB</span><span class="v">${esc(c.applicant.dob)}</span></div>
+      <div class="kv-item"><span class="k">Document</span><span class="v">${c.docType} · ${esc(c.applicant.idNumber)}</span></div>
+      <div class="kv-item"><span class="k">Country</span><span class="v">${esc(c.applicant.country)}</span></div>
+    </div>
+    <hr class="hr-line">
+    <h3 style="font-size:14px;">Risk fusion summary</h3>
+    <p>Composite risk score: <strong>${c.riskScore} / 100</strong> — classified as <strong>${c.riskLevel}</strong>.</p>
+    <table style="width:100%;border-collapse:collapse;font-size:12.4px;">
+      <thead><tr><th style="text-align:left;padding:6px 0;border-bottom:1px solid var(--border);">Signal</th><th style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border);">Risk</th><th style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border);">Contribution</th></tr></thead>
+      <tbody>
+        ${r.fusion.factors.map(fc=>`<tr><td style="padding:6px 0;border-bottom:1px solid var(--border-soft);">${fc.name}</td><td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border-soft);">${fc.riskPct}%</td><td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border-soft);">+${fc.contribution.toFixed(1)} pts</td></tr>`).join('')}
+      </tbody>
+    </table>
+    <hr class="hr-line">
+    <h3 style="font-size:14px;">Document tamper analysis</h3>
+    <p>Tamper score: <strong>${r.tamper.score}/100</strong>. ${r.tamper.checks.filter(x=>!x.pass).length} of ${r.tamper.checks.length} forensic checks flagged.</p>
+    <hr class="hr-line">
+    <h3 style="font-size:14px;">Voice authenticity</h3>
+    <p>${r.voice.provided ? `Classification: <strong>${r.voice.classification}</strong> (score ${r.voice.score}%).` : 'No voice sample was submitted for this case.'}</p>
+    <hr class="hr-line">
+    <h3 style="font-size:14px;">Authorized source verification</h3>
+    <p>${r.source.map(s=>`${s.name}: <strong>${s.status}</strong>`).join(' · ')}</p>
+    <hr class="hr-line">
+    <h3 style="font-size:14px;">Disposition</h3>
+    <p>Status: <strong>${c.status}</strong> · Reviewer: <strong>${esc(c.reviewer||'Unassigned')}</strong></p>
+    <p class="text-xs text-faint">This report was generated by the ShieldX platform using deterministic demo analysis logic and is intended for prototype evaluation purposes.</p>
+  `;
+}
+
+function downloadReport(c){
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>ShieldX Report — ${c.id}</title>
+  <style>body{font-family:Arial,sans-serif;max-width:720px;margin:40px auto;color:#101828;font-size:13px;}
+  h3{margin-top:22px;} table{width:100%;border-collapse:collapse;} td,th{padding:6px 0;border-bottom:1px solid #eee;}
+  .badge{padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;background:#eee;}</style></head>
+  <body>${buildReportHtml(c)}</body></html>`;
+  const blob = new Blob([html], { type:'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `ShieldX_Report_${c.id}.html`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  logAudit('Report Generated', `Report downloaded for case ${c.id}.`, c.id);
+  toast('Report downloaded.', 'ok');
+}
+
+function recordReviewDecision(c, status){
+  const noteEl = document.getElementById('caseReviewNote');
+  const note = noteEl ? noteEl.value.trim() : '';
+  if((status==='Rejected'||status==='Escalated') && !note){
+    toast('Please add a reviewer note explaining this decision.', 'err');
+    return;
+  }
+  c.status = status;
+  c.reviewer = state.currentUser.name;
+  const actionLabel = status==='Approved'?'Case Approved':status==='Rejected'?'Case Rejected':'Case Escalated';
+  c.auditTrail.push({ time:new Date(), actor:state.currentUser.name, role:state.currentUser.role, action:actionLabel, note: note || `Marked as ${status.toLowerCase()}.` });
+  logAudit(actionLabel, `${c.id}: ${note||'—'}`, c.id);
+  toast(`Case ${c.id} marked as ${status}.`, status==='Rejected'?'err':status==='Escalated'?'warn':'ok');
+  render();
+}
+
+/* =========================================================================
+   NEW SCREENING — WIZARD
+   ========================================================================= */
+const PIPELINE_STAGES = [
+  { key:'ocr', label:'OCR Extraction', sub:'Reading document fields with PaddleOCR / Tesseract' },
+  { key:'tamper', label:'Document Tamper Analysis', sub:'OpenCV-based forensic image inspection' },
+  { key:'identity', label:'Cross-Document Identity Matching', sub:'Reconciling identity fields across submitted documents' },
+  { key:'voice', label:'Voice Authenticity Analysis', sub:'Screening submitted audio for synthetic speech artifacts' },
+  { key:'source', label:'Authorized Source Verification', sub:'Checking against connected authoritative registries' },
+  { key:'fusion', label:'Risk Fusion Engine', sub:'Combining all signals into an explainable composite score' },
+];
+
+function freshWizard(){
+  return {
+    step: 1,
+    applicant: { name:'', dob:'', idNumber:'', country: COUNTRIES[0] },
+    files: { idFront:null, idBack:null, selfie:null, voice:null },
+    stageIndex: -1,
+    running: false,
+    result: null,
+  };
+}
+
+function renderNewScreening(){
+  if(!state.wizard) state.wizard = freshWizard();
+  const w = state.wizard;
+  const stepLabels = ['Applicant & Documents','Running Analysis','Results & Decision'];
+  const stepperHtml = `<div class="stepper">
+    ${stepLabels.map((lbl,i)=>{
+      const n = i+1;
+      const cls = n<w.step ? 'done' : n===w.step ? 'active' : '';
+      return `<div class="step ${cls}"><div class="num">${n<w.step?icon('check'):n}</div><span>${lbl}</span></div>${i<stepLabels.length-1?'<div class="line '+(n<w.step?'done':'')+'"></div>':''}`;
+    }).join('')}
+  </div>`;
+
+  let body = '';
+  if(w.step===1) body = renderWizardStep1(w);
+  else if(w.step===2) body = renderWizardStep2(w);
+  else body = renderWizardStep3(w);
+
+  return `
+  <div style="margin-bottom:6px;">
+    <h2 style="margin:0 0 4px;font-size:21px;">New Screening</h2>
+    <p class="text-muted text-sm" style="margin:0 0 20px;">Submit applicant documents and voice sample to run the full identity risk pipeline.</p>
+  </div>
+  ${stepperHtml}
+  ${body}`;
+}
+
+function renderWizardStep1(w){
+  const a = w.applicant;
+  function uploadBox(key, title, sub, iconName){
+    const f = w.files[key];
+    return `<label class="upload-box ${f?'filled':''}" data-upload="${key}">
+      <input type="file" accept="${key==='voice' ? 'audio/*' : 'image/*'}" data-file-input="${key}">
+      ${f && f.previewUrl ? `<img class="upload-thumb" src="${f.previewUrl}">` : `<div style="color:${f?'var(--safe)':'var(--text-faint)'}">${icon(f?'check':iconName)}</div>`}
+      <div class="up-title">${f ? esc(f.name) : title}</div>
+      <div class="up-sub">${f ? (f.sizeLabel+' · uploaded') : sub}</div>
+    </label>`;
+  }
+  return `
+  <div class="card card-pad">
+    <div class="section-title">Applicant details</div>
+    <div class="section-sub">Enter the information exactly as it appears on the primary identity document.</div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Full name</label><input class="input" id="wName" value="${esc(a.name)}" placeholder="e.g. Aisha Khan"></div>
+      <div class="field"><label class="field-label">Date of birth</label><input class="input" id="wDob" placeholder="e.g. Jan 12, 1994" value="${esc(a.dob)}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="field-label">Document number</label><input class="input" id="wIdNumber" placeholder="e.g. X1234567" value="${esc(a.idNumber)}"></div>
+      <div class="field"><label class="field-label">Country / issuing region</label>
+        <select class="input" id="wCountry">${COUNTRIES.map(c=>`<option ${c===a.country?'selected':''}>${c}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Document type</label>
+      <select class="input" id="wDocType">${DOC_TYPES.map(d=>`<option ${d===(w.docType||DOC_TYPES[0])?'selected':''}>${d}</option>`).join('')}</select>
+    </div>
+  </div>
+
+  <div class="card card-pad" style="margin-top:16px;">
+    <div class="section-title">Document &amp; biometric upload</div>
+    <div class="section-sub">Upload clear images of the identity document, a selfie for liveness matching, and an optional voice sample.</div>
+    <div class="upload-grid">
+      ${uploadBox('idFront','ID Document — Front','JPG, PNG or PDF up to 10MB','doc')}
+      ${uploadBox('idBack','ID Document — Back (optional)','JPG, PNG or PDF up to 10MB','doc')}
+      ${uploadBox('selfie','Selfie / Liveness Photo','Clear, front-facing photo','face')}
+      ${uploadBox('voice','Voice Sample (optional)','WAV or MP3, 5–30 seconds','mic')}
+    </div>
+  </div>
+
+  <div class="flex justify-between" style="margin-top:20px;">
+    <button class="btn btn-outline" data-nav="dashboard">Cancel</button>
+    <button class="btn btn-primary" id="wizardNextBtn">Continue to analysis ${icon('chev')}</button>
+  </div>`;
+}
+
+function renderWizardStep2(w){
+  return `
+  <div class="card card-pad">
+    <div class="section-title">Running the ShieldX risk pipeline</div>
+    <div class="section-sub">Analyzing documents for ${esc(w.applicant.name)||'this applicant'} — please keep this window open.</div>
+    <div class="progress-track" style="margin:14px 0 4px;"><div class="progress-fill" style="width:${Math.round(((w.stageIndex+1)/PIPELINE_STAGES.length)*100)}%"></div></div>
+    <div class="pipeline">
+      ${PIPELINE_STAGES.map((s,i)=>{
+        const cls = i<w.stageIndex ? 'done' : i===w.stageIndex ? 'active' : '';
+        const circContent = i<w.stageIndex ? icon('check') : i===w.stageIndex ? '<div class="spinner"></div>' : (i+1);
+        return `<div class="pipe-stage ${cls}">
+          <div class="rail"><div class="circ">${circContent}</div>${i<PIPELINE_STAGES.length-1?'<div class="bar"></div>':''}</div>
+          <div class="body">
+            <div class="p-title">${s.label}</div>
+            <div class="p-sub">${i<=w.stageIndex ? s.sub : 'Waiting…'}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function renderWizardStep3(w){
+  const r = w.result;
+  const f = r.fusion;
+  return `
+  <div class="card card-pad" style="margin-bottom:16px;">
+    <div class="flex" style="gap:24px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+      <div style="flex:1;min-width:260px;">
+        <div class="section-title">Risk Fusion — Explainable Score</div>
+        <div class="section-sub">Composite score weighted across six independent signal engines.</div>
+        <div style="margin-top:10px;">
+          ${f.factors.map(fc=>`
+            <div class="factor-row">
+              <div class="factor-name">${fc.name}</div>
+              <div class="factor-bar-track"><div class="factor-bar-fill" style="width:${fc.riskPct}%;background:${fc.riskPct>60?'var(--danger)':fc.riskPct>30?'var(--warn)':'var(--safe)'}"></div></div>
+              <div class="factor-pts">+${fc.contribution.toFixed(1)}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div style="flex-shrink:0;">${gaugeBlock(f.score, f.verdict, 220)}</div>
+    </div>
+  </div>
+
+  ${renderAnalysisSections(r)}
+
+  <div class="card card-pad" style="margin-top:16px;">
+    <div class="section-title">Reviewer decision</div>
+    <div class="section-sub">This case will be logged to the audit trail with your decision and role.</div>
+    <div class="field"><label class="field-label">Reviewer note</label><textarea class="input" id="wizardReviewNote" rows="3" placeholder="Add context for this decision (optional for approve, recommended for reject/escalate)"></textarea></div>
+    <div class="flex gap-12" style="flex-wrap:wrap;">
+      <button class="btn btn-safe" id="wizardApprove">${icon('check')} Approve as Genuine</button>
+      <button class="btn btn-warn" id="wizardEscalate">${icon('alert')} Escalate for Senior Review</button>
+      <button class="btn btn-danger" id="wizardReject">${icon('x')} Reject as Fraudulent</button>
+    </div>
+  </div>`;
+}
+
+function renderAnalysisSections(r){
+  return `
+  <div class="dash-grid" style="grid-template-columns:1fr 1fr;">
+    <div class="card card-pad">
+      <div class="section-title">OCR extracted fields</div>
+      <div class="section-sub">Average confidence ${r.ocr.avgConfidence}%</div>
+      <div class="kv-list">
+        ${r.ocr.fields.map(fl=>`
+          <div class="kv-item">
+            <span class="k">${fl.label}</span>
+            <span class="v">${esc(fl.value)} <span class="text-faint text-xs">(${fl.confidence}%)</span></span>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">Document tamper analysis</div>
+      <div class="section-sub">Overall tamper score: <strong style="color:${r.tamper.score>60?'var(--danger)':r.tamper.score>30?'var(--warn)':'var(--safe)'}">${r.tamper.score}/100</strong></div>
+      ${r.tamper.checks.map(c=>checkRow(c.name, c.pass)).join('')}
+    </div>
+  </div>
+  <div class="dash-grid" style="grid-template-columns:1fr 1fr;margin-top:16px;">
+    <div class="card card-pad">
+      <div class="section-title">Cross-document identity match</div>
+      <div class="section-sub">Match confidence: <strong>${r.identity.score}%</strong> &nbsp;·&nbsp; Liveness score: <strong>${r.liveness.score}%</strong></div>
+      ${r.identity.fields.map(fl=>checkRow(fl.label, fl.match)).join('')}
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">Voice authenticity analysis</div>
+      ${r.voice.provided ? `
+        <div class="section-sub">Classification: <strong>${r.voice.classification}</strong> · Score ${r.voice.score}%</div>
+        ${r.voice.flags.map(fl=>checkRow(fl.name, fl.pass)).join('')}
+      ` : `<div class="empty-state" style="padding:20px 10px;">No voice sample was submitted for this case.<br><span class="text-xs">Voice risk defaulted to a neutral penalty in the fusion score.</span></div>`}
+    </div>
+  </div>
+  <div class="card card-pad" style="margin-top:16px;">
+    <div class="section-title">Authorized source / API verification</div>
+    <div class="section-sub">Simulated lookups against connected authoritative registries (demo data).</div>
+    <div class="upload-grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+      ${r.source.map(s=>`
+        <div class="card card-pad" style="border-style:dashed;">
+          <div class="flex justify-between items-center">
+            <span class="text-sm" style="font-weight:700;">${s.name}</span>
+            <span class="badge ${s.status==='Verified'?'badge-safe':s.status==='Mismatch'?'badge-danger':'badge-warn'}">${s.status}</span>
+          </div>
+          <div class="text-xs text-faint mono" style="margin-top:8px;">${s.ref}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+function checkRow(label, pass){
+  return `<div class="check-row">
+    <div class="check-left">
+      <div class="check-icon" style="background:${pass?'var(--safe-soft)':'var(--danger-soft)'};color:${pass?'var(--safe)':'var(--danger)'}">${icon(pass?'check':'x')}</div>
+      ${esc(label)}
+    </div>
+    <span class="badge ${pass?'badge-safe':'badge-danger'}">${pass?'Pass':'Flagged'}</span>
+  </div>`;
+}
+
+function fileMeta(file){
+  return new Promise(resolve=>{
+    const sizeLabel = file.size > 1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : Math.round(file.size/1024)+' KB';
+    const meta = { name:file.name, sizeLabel, previewUrl:null };
+    if(file.type.startsWith('image/')){
+      meta.previewUrl = URL.createObjectURL(file);
+    }
+    resolve(meta);
+  });
+}
+
+function attachWizardHandlers(){
+  const w = state.wizard;
+  document.querySelectorAll('[data-file-input]').forEach(inp=>{
+    inp.addEventListener('change', async (e)=>{
+      const key = inp.dataset.fileInput;
+      const file = e.target.files[0];
+      if(!file) return;
+      const meta = await fileMeta(file);
+      w.files[key] = meta;
+      render();
+    });
+  });
+  const nameEl = document.getElementById('wName');
+  if(nameEl){
+    ['wName','wDob','wIdNumber'].forEach(id=>{
+      document.getElementById(id).addEventListener('input', e=>{
+        const map = { wName:'name', wDob:'dob', wIdNumber:'idNumber' };
+        w.applicant[map[id]] = e.target.value;
+      });
+    });
+    document.getElementById('wCountry').addEventListener('change', e=> w.applicant.country = e.target.value);
+    document.getElementById('wDocType').addEventListener('change', e=> w.docType = e.target.value);
+  }
+  const nextBtn = document.getElementById('wizardNextBtn');
+  if(nextBtn) nextBtn.addEventListener('click', startScreeningPipeline);
+
+  const approve = document.getElementById('wizardApprove');
+  const escalate = document.getElementById('wizardEscalate');
+  const reject = document.getElementById('wizardReject');
+  if(approve) approve.addEventListener('click', ()=> finalizeWizardCase('Approved'));
+  if(escalate) escalate.addEventListener('click', ()=> finalizeWizardCase('Escalated'));
+  if(reject) reject.addEventListener('click', ()=> finalizeWizardCase('Rejected'));
+}
+
+function startScreeningPipeline(){
+  const w = state.wizard;
+  if(!w.applicant.name || !w.applicant.idNumber){
+    toast('Please provide at least the applicant name and document number.', 'err');
+    return;
+  }
+  if(!w.files.idFront){
+    toast('Please upload the front of the identity document.', 'err');
+    return;
+  }
+  w.docType = w.docType || DOC_TYPES[0];
+  w.step = 2;
+  w.stageIndex = -1;
+  render();
+  runNextStage();
+}
+function runNextStage(){
+  const w = state.wizard;
+  w.stageIndex++;
+  render();
+  if(w.stageIndex >= PIPELINE_STAGES.length-1){
+    setTimeout(()=>{
+      const docs = [
+        { type: w.docType, filename: w.files.idFront.name },
+        w.files.idBack ? { type: w.docType+' (back)', filename: w.files.idBack.name } : null,
+        { type:'Selfie Photo', filename: w.files.selfie ? w.files.selfie.name : 'selfie.jpg' },
+      ].filter(Boolean);
+      const seed = w.applicant.name+'|'+w.applicant.idNumber+'|'+Date.now();
+      w.result = buildCaseAnalysis(w.applicant, docs, !!w.files.voice, seed);
+      w.step = 3;
+      render();
+      toast('Analysis complete — risk score generated.', 'ok');
+    }, 750);
+    return;
+  }
+  setTimeout(runNextStage, 700);
+}
+
+function finalizeWizardCase(status){
+  const w = state.wizard;
+  const note = document.getElementById('wizardReviewNote').value.trim();
+  if((status==='Rejected'||status==='Escalated') && !note){
+    toast('Please add a reviewer note explaining this decision.', 'err');
+    return;
+  }
+  const id = 'SX-'+(1000 + state.cases.length + Math.floor(Math.random()*90));
+  const now = new Date();
+  const newCase = {
+    id,
+    applicant: w.applicant,
+    docType: w.docType,
+    submitted: now,
+    status,
+    analysis: w.result,
+    riskScore: w.result.fusion.score,
+    riskLevel: w.result.fusion.verdict,
+    analyst: state.currentUser.name,
+    reviewer: state.currentUser.name,
+    auditTrail: [
+      { time: now, actor: state.currentUser.name, role: state.currentUser.role, action:'Screening Submitted', note:`Case created for ${w.applicant.name} (${w.docType}).` },
+      { time: new Date(now.getTime()+2000), actor:'ShieldX Engine', role:'System', action:'Risk Fusion Complete', note:`Risk score ${w.result.fusion.score} — ${w.result.fusion.verdict}.` },
+      { time: new Date(now.getTime()+4000), actor: state.currentUser.name, role: state.currentUser.role,
+        action: status==='Approved'?'Case Approved':status==='Rejected'?'Case Rejected':'Case Escalated',
+        note: note || 'Reviewed and confirmed genuine identity.' },
+    ],
+  };
+  state.cases.unshift(newCase);
+  logAudit('Case Created', `${id} — ${w.applicant.name} (${w.docType}).`, id);
+  logAudit(status==='Approved'?'Case Approved':status==='Rejected'?'Case Rejected':'Case Escalated', `${id}: ${note||'—'}`, id);
+  toast(`Case ${id} saved as ${status}.`, status==='Rejected'?'err':status==='Escalated'?'warn':'ok');
+  state.wizard = null;
+  navigate('case-detail', { caseId:id });
+}
+
+/* =========================================================================
+   DASHBOARD
+   ========================================================================= */
+function renderDashboard(){
+  const cases = state.cases;
+  const total = cases.length;
+  const genuine = cases.filter(c=>c.riskLevel==='Genuine').length;
+  const suspicious = cases.filter(c=>c.riskLevel==='Suspicious').length;
+  const highRisk = cases.filter(c=>c.riskLevel==='High Risk').length;
+  const pending = cases.filter(c=>c.status==='Pending Review').length;
+  const recent = cases.slice(0,6);
+
+  const statCards = [
+    { label:'Total Cases', val: total, delta:`+${cases.filter(c=>(Date.now()-c.submitted)<7*864e5).length} this week`, color:'--brand', icon:'cases' },
+    { label:'Genuine', val: genuine, delta: total? Math.round(genuine/total*100)+'% of total':'—', color:'--safe', icon:'shieldcheck' },
+    { label:'Suspicious', val: suspicious, delta: total? Math.round(suspicious/total*100)+'% of total':'—', color:'--warn', icon:'alert' },
+    { label:'High Risk', val: highRisk, delta: total? Math.round(highRisk/total*100)+'% of total':'—', color:'--danger', icon:'alert' },
+    { label:'Pending Review', val: pending, delta: 'Needs reviewer action', color:'--brand-dark', icon:'audit' },
+  ];
+
+  return `
+  <div class="flex justify-between items-center" style="margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h2 style="margin:0;font-size:21px;">Welcome back, ${state.currentUser.name.split(' ')[0]}</h2>
+      <p class="text-muted text-sm" style="margin:4px 0 0;">Here's what's happening across your screening pipeline.</p>
+    </div>
+    <button class="btn btn-primary" data-nav="new-screening">${icon('plus')} New Screening</button>
+  </div>
+
+  <div class="stat-grid">
+    ${statCards.map(s=>`
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(${s.color})">${icon(s.icon)}</div>
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-val" style="color:var(${s.color})">${s.val}</div>
+        <div class="stat-delta text-muted">${s.delta}</div>
+      </div>`).join('')}
+  </div>
+
+  <div class="dash-grid">
+    <div class="card card-pad">
+      <div class="section-title">Screening volume — last 14 days</div>
+      <div class="section-sub">Cases submitted per day across all analysts</div>
+      <div class="chart-box"><canvas id="chartVolume"></canvas></div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">Risk distribution</div>
+      <div class="section-sub">Verdict breakdown across all screened cases</div>
+      <div class="chart-box"><canvas id="chartRisk"></canvas></div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="card card-pad">
+      <div class="section-title">Recent cases</div>
+      <div class="section-sub">Latest submissions across the platform</div>
+      <div class="scroll-x">
+      <table class="data-table">
+        <thead><tr><th>Case</th><th>Applicant</th><th>Document</th><th>Risk</th><th>Status</th><th>Submitted</th></tr></thead>
+        <tbody>
+          ${recent.map(c=>`
+            <tr data-open-case="${c.id}">
+              <td data-label="Case" class="case-id">${c.id}</td>
+              <td data-label="Applicant"><strong>${esc(c.applicant.name)}</strong></td>
+              <td data-label="Document">${c.docType}</td>
+              <td data-label="Risk"><span class="badge ${verdictBadgeClass(c.riskLevel)}">${c.riskLevel}</span></td>
+              <td data-label="Status"><span class="badge ${statusBadgeClass(c.status)}">${c.status}</span></td>
+              <td data-label="Submitted" class="text-muted text-sm">${fmtDate(c.submitted)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>
+      <div style="text-align:right;margin-top:10px;"><button class="btn btn-outline btn-sm" data-nav="cases">View all cases ${icon('chev')}</button></div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">Top source verification signals</div>
+      <div class="section-sub">Authorized source check outcomes (30 days)</div>
+      <div class="chart-box-sm"><canvas id="chartSources"></canvas></div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================================
+   CASE MANAGEMENT — list, search, filters
+   ========================================================================= */
+function filteredCases(){
+  const f = state.filters;
+  return state.cases.filter(c=>{
+    if(f.q){
+      const q = f.q.toLowerCase();
+      const hay = (c.id+' '+c.applicant.name+' '+c.applicant.idNumber).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    if(f.risk!=='All' && c.riskLevel!==f.risk) return false;
+    if(f.status!=='All' && c.status!==f.status) return false;
+    if(f.docType!=='All' && c.docType!==f.docType) return false;
+    return true;
+  });
+}
+
+function renderCases(){
+  const list = filteredCases();
+  const f = state.filters;
+  return `
+  <div class="flex justify-between items-center" style="margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+    <div>
+      <h2 style="margin:0 0 4px;font-size:21px;">Case Management</h2>
+      <p class="text-muted text-sm" style="margin:0;">${list.length} of ${state.cases.length} cases shown</p>
+    </div>
+    <button class="btn btn-primary" data-nav="new-screening">${icon('plus')} New Screening</button>
+  </div>
+
+  <div class="card card-pad" style="margin-bottom:16px;">
+    <div class="filter-bar">
+      <div class="search-input-wrap">
+        ${icon('search')}
+        <input class="input" id="caseSearch" placeholder="Search by applicant name, case ID or document number…" value="${esc(f.q)}">
+      </div>
+      <select class="input" id="filterRisk">
+        ${['All','Genuine','Suspicious','High Risk'].map(v=>`<option ${f.risk===v?'selected':''}>${v}</option>`).join('')}
+      </select>
+      <select class="input" id="filterStatus">
+        ${['All','Pending Review','Approved','Rejected','Escalated'].map(v=>`<option ${f.status===v?'selected':''}>${v}</option>`).join('')}
+      </select>
+      <select class="input" id="filterDoc">
+        ${['All',...DOC_TYPES].map(v=>`<option ${f.docType===v?'selected':''}>${v}</option>`).join('')}
+      </select>
+      <button class="btn btn-ghost btn-sm" id="clearFilters">Clear</button>
+    </div>
+  </div>
+
+  <div class="card card-pad">
+    ${list.length ? `
+    <div class="scroll-x">
+    <table class="data-table">
+      <thead><tr><th>Case ID</th><th>Applicant</th><th>Document</th><th>Risk Score</th><th>Verdict</th><th>Status</th><th>Analyst</th><th>Submitted</th></tr></thead>
+      <tbody>
+        ${list.map(c=>`
+          <tr data-open-case="${c.id}">
+            <td data-label="Case ID" class="case-id">${c.id}</td>
+            <td data-label="Applicant"><strong>${esc(c.applicant.name)}</strong><div class="text-xs text-faint">${esc(c.applicant.idNumber)}</div></td>
+            <td data-label="Document">${c.docType}</td>
+            <td data-label="Risk Score"><strong style="color:var(${verdictColorVar(c.riskLevel)})">${c.riskScore}</strong>/100</td>
+            <td data-label="Verdict"><span class="badge ${verdictBadgeClass(c.riskLevel)}">${c.riskLevel}</span></td>
+            <td data-label="Status"><span class="badge ${statusBadgeClass(c.status)}">${c.status}</span></td>
+            <td data-label="Analyst" class="text-sm">${esc(c.analyst)}</td>
+            <td data-label="Submitted" class="text-sm text-muted">${fmtDate(c.submitted)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>` : `<div class="empty-state">${icon('cases')}<p>No cases match your filters. Try adjusting search criteria.</p></div>`}
+  </div>`;
+}
+
+function renderChartsForView(){
+  Object.values(state.charts).forEach(c=>{ try{ c.destroy(); }catch(e){} });
+  state.charts = {};
+  if(state.view==='dashboard') renderDashboardCharts();
+  if(state.view==='case-detail') renderCaseDetailCharts();
+}
+
+function renderDashboardCharts(){
+  const days = [];
+  const counts = [];
+  for(let i=13;i>=0;i--){
+    const d = daysAgo(i);
+    days.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    const dayKey = d.toDateString();
+    counts.push(state.cases.filter(c=>new Date(c.submitted).toDateString()===dayKey).length);
+  }
+  const volCtx = document.getElementById('chartVolume');
+  if(volCtx){
+    state.charts.volume = new Chart(volCtx, {
+      type:'bar',
+      data:{ labels:days, datasets:[{ label:'Cases', data:counts, backgroundColor:'#0AA6A6', borderRadius:5, maxBarThickness:22 }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{ y:{beginAtZero:true, ticks:{precision:0, font:{size:10.5}}, grid:{color:'#EDF1F6'} }, x:{ ticks:{font:{size:10}}, grid:{display:false} } } }
+    });
+  }
+  const riskCtx = document.getElementById('chartRisk');
+  if(riskCtx){
+    const g = state.cases.filter(c=>c.riskLevel==='Genuine').length;
+    const s = state.cases.filter(c=>c.riskLevel==='Suspicious').length;
+    const h = state.cases.filter(c=>c.riskLevel==='High Risk').length;
+    state.charts.risk = new Chart(riskCtx, {
+      type:'doughnut',
+      data:{ labels:['Genuine','Suspicious','High Risk'], datasets:[{ data:[g,s,h], backgroundColor:['#178A5A','#B5720C','#C23434'], borderWidth:0 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{size:11.5}, usePointStyle:true, pointStyle:'circle' } } } }
+    });
+  }
+  const srcCtx = document.getElementById('chartSources');
+  if(srcCtx){
+    const tally = {};
+    SOURCE_CHECKS_DEF.forEach(s=>tally[s]={Verified:0,'Not Found':0,Mismatch:0});
+    state.cases.forEach(c=>{ c.analysis.source.forEach(s=>{ tally[s.name][s.status]++; }); });
+    const labels = SOURCE_CHECKS_DEF.map(s=>s.replace(' Database','').replace(' Registry','').replace(' Screen','').replace(' Bureau',''));
+    state.charts.sources = new Chart(srcCtx, {
+      type:'bar',
+      data:{ labels, datasets:[
+        { label:'Verified', data: SOURCE_CHECKS_DEF.map(s=>tally[s].Verified), backgroundColor:'#178A5A' },
+        { label:'Not Found', data: SOURCE_CHECKS_DEF.map(s=>tally[s]['Not Found']), backgroundColor:'#B5720C' },
+        { label:'Mismatch', data: SOURCE_CHECKS_DEF.map(s=>tally[s].Mismatch), backgroundColor:'#C23434' },
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10.5}}}},
+        scales:{ x:{ stacked:true, ticks:{font:{size:9.5}}, grid:{display:false} }, y:{ stacked:true, beginAtZero:true, ticks:{precision:0,font:{size:10}}, grid:{color:'#EDF1F6'} } } }
+    });
+  }
+}
+</script>
+</body>
+</html>
